@@ -8,6 +8,8 @@
 
 This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode. Additionally, ElevenLabs is used for audio generation.
 
+[Uploading screen-capture.webm…]()
+
 ## Features
 
 - **Audio to Text**: Convert podcast episodes into text using Hugging Face models.
@@ -45,7 +47,7 @@ This project takes podcast episodes from the Podcast Index, converts the audio i
    - export ELEVENLABS_API_KEY=your_api_key;
    - export PODCAST_INDEX_API_SECRET=your_api_secret;
    - export PODCAST_INDEX_API_KEY=your_api_key;
-   - export HF_API_KEY=yourApiKey;
+   - export HF_API_KEY=your_api_key;
 4. Run the command: mvn exec:java -Dspring.profiles.active=local
 5. Open the following link in your browser: http://localhost:8208/api/swagger-ui/index.html#/
 
