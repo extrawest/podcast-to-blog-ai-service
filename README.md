@@ -8,7 +8,7 @@
 
 This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode. Additionally, ElevenLabs is used for audio generation.
 
-[Uploading screen-capture.webm…]()
+[screen-capture.webm](https://github.com/user-attachments/assets/280ca7fe-2abb-4ff3-a343-01225bb67673)
 
 ## Features
 
