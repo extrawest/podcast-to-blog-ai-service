@@ -1,0 +1,1 @@
+alter table podcast_episodes add column content_summary text null;
