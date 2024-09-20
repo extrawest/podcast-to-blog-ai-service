@@ -46,7 +46,7 @@ https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
 3. Create a database named 'podcast_analyzer'
 4. Set up the following environment variables.
    - export QDRANT_GRPC_HOST=your_host;
-   - export QDRANT_API_KEY==your_api_key;
+   - export QDRANT_API_KEY=your_api_key;
    - export REPLICATE_API_TOKEN=your_api_key;
    - export PODCAST_INDEX_API_SECRET=your_api_secret;
    - export PODCAST_INDEX_API_KEY=your_api_key;
