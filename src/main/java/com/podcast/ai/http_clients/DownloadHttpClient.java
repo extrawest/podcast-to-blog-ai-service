@@ -14,7 +14,7 @@ import java.net.URL;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DownloadSpeechHttpClient {
+public class DownloadHttpClient {
 
     public byte[] download(URL url) {
         CloseableHttpClient httpclient = HttpClients.custom()

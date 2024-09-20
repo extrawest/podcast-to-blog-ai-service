@@ -3,6 +3,8 @@ package com.podcast.ai.controllers;
 import com.podcast.ai.configurations.SwaggerPageable;
 import com.podcast.ai.models.api.PodcastEpisodesRequest;
 import com.podcast.ai.models.dto.PodcastEpisodeDTO;
+import com.podcast.ai.models.replicate.text.ReplicateTextChatMessage;
+import com.podcast.ai.models.replicate.text.ReplicateTranslateMessage;
 import com.podcast.ai.services.PodcastProcessingService;
 import com.podcast.ai.services.chat.ClientChatRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,22 +34,15 @@ public class PodcastProcessingController {
 
     @Operation(summary = "Ready to use")
     @PostMapping( "/podcastEpisodes/createContentSummary")
-    public ResponseEntity<String> createContentSummary(@RequestParam String podcastGuid, @RequestParam Long episodeId) {
-        String response = service.createContentSummary(podcastGuid, episodeId);
+    public ResponseEntity<ReplicateTextChatMessage> createContentSummary(@RequestParam String podcastGuid, @RequestParam Long episodeId) {
+        ReplicateTextChatMessage response = service.createContentSummary(podcastGuid, episodeId);
         return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Ready to use")
     @PostMapping( "/podcastEpisodes/translateSummaryToFrench")
-    public ResponseEntity<String> translateSummaryToFrench(@RequestParam String podcastGuid, @RequestParam Long episodeId) {
-        String response = service.translateSummaryToFrench(podcastGuid, episodeId);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Operation(summary = "Ready to use")
-    @PostMapping( "/podcastEpisodes/generateTitle")
-    public ResponseEntity<String> generateTitle(@RequestParam String podcastGuid, @RequestParam Long episodeId) {
-        String response = service.generateTitle(podcastGuid, episodeId);
+    public ResponseEntity<ReplicateTranslateMessage> translateSummaryToFrench(@RequestParam String podcastGuid, @RequestParam Long episodeId) {
+        ReplicateTranslateMessage response = service.translateSummaryToFrench(podcastGuid, episodeId);
         return ResponseEntity.ok().body(response);
     }
 

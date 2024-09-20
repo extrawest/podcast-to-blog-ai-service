@@ -5,16 +5,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.podcast.ai.exceptions.InvalidDataException;
 import com.podcast.ai.exceptions.NotFoundException;
-import com.podcast.ai.http_clients.DownloadSpeechHttpClient;
-import com.podcast.ai.http_clients.ElevenlabsHttpClient;
-import com.podcast.ai.http_clients.HuggingFaceHttpClient;
-import com.podcast.ai.http_clients.PodcastIndexHttpClient;
+import com.podcast.ai.http_clients.*;
 import com.podcast.ai.mappers.PodcastEpisodeMapper;
 import com.podcast.ai.models.api.PodcastEpisodesRequest;
 import com.podcast.ai.models.dto.PodcastEpisodeDTO;
 import com.podcast.ai.models.entities.PodcastEpisode;
-import com.podcast.ai.models.hugging_face.*;
 import com.podcast.ai.models.podcast_index.PodcastIndexResponse;
+import com.podcast.ai.models.replicate.image.ReplicateGenerateImageRequest;
+import com.podcast.ai.models.replicate.image.ReplicateGenerateImageResponse;
+import com.podcast.ai.models.replicate.speech_to_text.ReplicateSpeechToTextResponse;
+import com.podcast.ai.models.replicate.text.ReplicateTextChatMessage;
+import com.podcast.ai.models.replicate.text.ReplicateTextChatRequest;
+import com.podcast.ai.models.replicate.text.ReplicateTranslateMessage;
+import com.podcast.ai.models.replicate.text_to_speech.ReplicateTextToSpeechRequest;
+import com.podcast.ai.models.replicate.text_to_speech.ReplicateTextToSpeechResponse;
 import com.podcast.ai.repositories.PodcastEpisodeRepository;
 import com.podcast.ai.repositories.criteries.PodcastEpisodesCriteria;
 import com.podcast.ai.services.chat.ChatService;
@@ -45,12 +49,11 @@ public class PodcastProcessingService {
     }
 
     private final PodcastIndexHttpClient podcastIndexHttpClient;
-    private final HuggingFaceHttpClient huggingFaceHttpClient;
-    private final DownloadSpeechHttpClient downloadSpeechHttpClient;
-    private final ElevenlabsHttpClient elevenlabsHttpClient;
+    private final DownloadHttpClient downloadHttpClient;
     private final PodcastEpisodeRepository podcastEpisodeRepository;
     private final PodcastEpisodeMapper podcastEpisodMapper;
     private final DataIngestionService dataIngestionService;
+    private final ReplicateHttpClient replicateHttpClient;
     private final ChatService chatService;
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -84,73 +87,66 @@ public class PodcastProcessingService {
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
-    public String createContentSummary(String podcastGuid, Long episodeId) {
+    public ReplicateTextChatMessage createContentSummary(String podcastGuid, Long episodeId) {
         PodcastEpisode episod = getPodcastEpisod(podcastGuid, episodeId);
         if (Objects.nonNull(episod.getContentSummary())) {
-            return episod.getContentSummary();
+            return new ReplicateTextChatMessage(episod.getTitle(), episod.getContentSummary());
         }
 
         try {
-            byte[] bytes = downloadSpeechHttpClient.download(URI.create(episod.getEnclosureUrl()).toURL());
-            SpeechToTextResponse speech = huggingFaceHttpClient.speechToText(bytes);
-            dataIngestionService.insertDocuments(speech.getText(), podcastGuid);
-            List<SummarizeResponse> summarize = huggingFaceHttpClient.summarize(new SummarizeRequest(speech.getText()));
-            String summaryText = summarize.getFirst().getSummaryText().toLowerCase(Locale.ROOT);
+            ReplicateSpeechToTextResponse speechToTextResponse = replicateHttpClient.speechToText(episod);
+            dataIngestionService.insertDocuments(speechToTextResponse.getOutput().getTranscription(), podcastGuid);
 
-            episod.setContentSummary(summaryText);
+            String json = replicateHttpClient.textChat(
+                    new ReplicateTextChatRequest(
+                            String.format("""
+                                    Here is text of the podcast episode. Text: %s
+                                    Please generate content summary and title for this text.
+                                    Answer length for title must be maximum 8 words.
+                                    Answer must be in JSON format.
+                                    JSON answer must have only two fields 'title' and 'summary'
+                                    """, speechToTextResponse.getOutput().getTranscription())
+                    )
+            );
+            ReplicateTextChatMessage message = UNMARSHALLER.readValue(json, new TypeReference<>() {});
 
-            return summaryText;
+            if (Objects.nonNull(message)) {
+                episod.setTitle(message.getTitle());
+                episod.setContentSummary(message.getSummary());
+            }
+
+            return message;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return ERROR_RESPONSE + e.getMessage();
+            throw new InvalidDataException(e.getMessage());
         }
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
-    public String translateSummaryToFrench(String podcastGuid, Long episodeId) {
+    public ReplicateTranslateMessage translateSummaryToFrench(String podcastGuid, Long episodeId) {
         PodcastEpisode episod = getPodcastEpisod(podcastGuid, episodeId);
         if (Objects.isNull(episod.getContentSummary())) {
             throw new InvalidDataException(String.format("Podcast episode %s doesn't have summary", episodeId));
         }
 
         try {
-            List<TranslationResponse> translation = huggingFaceHttpClient.translation(new TranslationRequest(episod.getContentSummary()));
-            return translation.getFirst().getTranslationText().toLowerCase(Locale.ROOT);
+            String json = replicateHttpClient.textChat(
+                    new ReplicateTextChatRequest(
+                            String.format("""
+                                    Here is summary text of the podcast episode. Text: %s
+                                    Please translate it on french.
+                                    Answer must be in JSON format.
+                                    JSON answer must have only one field 'translatedText'
+                                    """, episod.getContentSummary())
+                    )
+            );
+            ReplicateTranslateMessage message = UNMARSHALLER.readValue(json, new TypeReference<>() {});
+            message.setText(episod.getContentSummary());
+
+            return message;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return ERROR_RESPONSE+ e.getMessage();
-        }
-    }
-
-    @Transactional(rollbackFor = RuntimeException.class)
-    public String generateTitle(String podcastGuid, Long episodeId) {
-        PodcastEpisode episod = getPodcastEpisod(podcastGuid, episodeId);
-        if (Objects.isNull(episod.getContentSummary())) {
-            throw new InvalidDataException(String.format("Podcast episode %s doesn't have summary", episodeId));
-        }
-
-        try {
-            ChatRequest request = new ChatRequest();
-            request.getMessages().add(new ChatMessage(
-                    "user",
-                            """
-                            Here is summary of the podcast episode.
-                            Please generate short title for this text.
-                            Answer length must be maximum 8 words.
-                            Answer must be in JSON format.
-                            JSON answer must have only one field 'title'
-                            """
-            ));
-
-            ChatResponse chat = huggingFaceHttpClient.chat(request);
-            EpisodTitle title = UNMARSHALLER.readValue(chat.getChoices().getFirst().getMessage().getContent(), new TypeReference<>() {});
-
-            episod.setTitle(title.getTitle().toLowerCase(Locale.ROOT));
-
-            return title.getTitle();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ERROR_RESPONSE+ e.getMessage();
+            throw new InvalidDataException(e.getMessage());
         }
     }
 
@@ -162,7 +158,8 @@ public class PodcastProcessingService {
         }
 
         try {
-            return huggingFaceHttpClient.textToImage(new TextToImageRequest(episod.getTitle()));
+            ReplicateGenerateImageResponse response = replicateHttpClient.generateImage(new ReplicateGenerateImageRequest(episod.getTitle()));
+            return downloadHttpClient.download(URI.create(response.getOutput().getFirst()).toURL());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return new byte[]{};
@@ -177,7 +174,8 @@ public class PodcastProcessingService {
         }
 
         try {
-            return elevenlabsHttpClient.textToSpeech(episod.getContentSummary());
+            ReplicateTextToSpeechResponse response = replicateHttpClient.generateSpeech(new ReplicateTextToSpeechRequest(episod.getContentSummary()));
+            return downloadHttpClient.download(URI.create(response.getOutput()).toURL());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return new byte[]{};

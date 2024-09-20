@@ -44,13 +44,13 @@ qgrant:
   grpc-host: ${QDRANT_GRPC_HOST}
   api-key: ${QDRANT_API_KEY}
 
+#Pass API key as environment variable, e.g. -DREPLICATE_API_KEY=your-api-key
+replicate:
+  api-key: ${REPLICATE_API_KEY}
+
 #Pass API key as environment variable, e.g. -DHF_API_KEY=your-api-key
 hugging-face:
   api-key: ${HF_API_KEY}
-
-#Pass API key as environment variable, e.g. -DELEVENLABS_API_KEY=your-api-key
-elevenlabs:
-  api-key: ${ELEVENLABS_API_KEY}
 
 #Swagger
 springdoc:
