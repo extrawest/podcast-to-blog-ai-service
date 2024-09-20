@@ -8,6 +8,12 @@
 
 This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode. Additionally, ElevenLabs is used for audio generation.
 
+
+
+https://github.com/user-attachments/assets/606464ef-4437-4eb9-8206-d88786c23b25
+
+
+
 ## Features
 
 - **Audio to Text**: Convert podcast episodes into text using Hugging Face models.
