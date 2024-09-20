@@ -38,16 +38,17 @@ This project takes podcast episodes from the Podcast Index, converts the audio i
 ## Running On Local Machine (Linux):
 
 1. Set up MySQL on your local machine.
-2. Create a database named 'podcast_analyzer'
-3. Set up the following environment variables.
+2. Set up qdrant: https://cloud.qdrant.io
+3. Create a database named 'podcast_analyzer'
+4. Set up the following environment variables.
    - export QDRANT_GRPC_HOST=your_host;
    - export QDRANT_API_KEY==your_api_key;
    - export ELEVENLABS_API_KEY=your_api_key;
    - export PODCAST_INDEX_API_SECRET=your_api_secret;
    - export PODCAST_INDEX_API_KEY=your_api_key;
    - export HF_API_KEY=your_api_key;
-4. Run the command: mvn exec:java -Dspring.profiles.active=local
-5. Open the following link in your browser: http://localhost:8208/api/swagger-ui/index.html#/
+5. Run the command: mvn exec:java -Dspring.profiles.active=local
+6. Open the following link in your browser: http://localhost:8208/api/swagger-ui/index.html#/
 
 ## Contributing
 
