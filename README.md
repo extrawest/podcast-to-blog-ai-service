@@ -6,7 +6,7 @@
 ![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)
 ![GitHub release](https://img.shields.io/badge/release-v1.0.0-blue)
 
-This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode. Additionally, ElevenLabs is used for audio generation.
+This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode.
 
 
 https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
