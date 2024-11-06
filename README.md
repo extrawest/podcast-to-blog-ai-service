@@ -3,13 +3,15 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]()
 [![Maintainer](https://img.shields.io/static/v1?label=Yevhen%20Ruban&message=Maintainer&color=red)](mailto:yevhen.ruban@extrawest.com)
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)]()
-![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![GitHub release](https://img.shields.io/badge/release-v1.0.0-blue)
 
-This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode.
+This project takes podcast episodes from the Podcast Index, converts the audio into text, summarizes the content, generates an image based on the summary, translates the summary into French, and allows users to ask questions about the episode. Additionally, ElevenLabs is used for audio generation.
 
 
-https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
+
+https://github.com/user-attachments/assets/606464ef-4437-4eb9-8206-d88786c23b25
+
 
 
 ## Features
@@ -26,7 +28,7 @@ https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
 - **Java 21**
 - **SpringBoot 3.3.3**: Backend framework for building fast and scalable applications.
 - **Hugging Face**: Provides models for transcription, summarization, and translation.
-- **Replicate**: Provides models for transcription, summarization, and translation.
+- **ElevenLabs**: Generates audio content based on summaries.
 - **LangChain4J**: Orchestrates the entire process by creating a chain that integrates all functionalities.
 
 ## How It Works
@@ -47,7 +49,7 @@ https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
 4. Set up the following environment variables.
    - export QDRANT_GRPC_HOST=your_host;
    - export QDRANT_API_KEY=your_api_key;
-   - export REPLICATE_API_TOKEN=your_api_key;
+   - export ELEVENLABS_API_KEY=your_api_key;
    - export PODCAST_INDEX_API_SECRET=your_api_secret;
    - export PODCAST_INDEX_API_KEY=your_api_key;
    - export HF_API_KEY=your_api_key;
@@ -57,7 +59,3 @@ https://github.com/user-attachments/assets/cf02bf4e-09f5-4dbf-9467-0b99cb82a8e8
 ## Contributing
 
 Feel free to open issues or submit pull requests to improve the project. Contributions are welcome!
-
-## License
-
-This project is licensed under the MIT License.
